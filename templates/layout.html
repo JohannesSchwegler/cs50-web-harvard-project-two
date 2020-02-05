@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Flask Johannes </title>
+    <link rel="stylesheet" href="../static/css/reset.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../static/css/style.css">
+ 
+</head>
+
+<body>
+    {% include 'includes/_navbar.html' %}
+
+    <div class="cc-overlay">
+        <div class="cc-flexC">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 184.48 126">
+                <defs>
+                    <style>
+                        .cls-1 {
+                            fill: #1766ff;
+                        }
+
+                        .cls-2 {
+                            fill: #fff;
+                        }
+                    </style>
+                </defs>
+                <title>Element 4</title>
+                <g id="Ebene_2" data-name="Ebene 2">
+                    <g id="Ebene_1-2" data-name="Ebene 1">
+                        <path class="cls-1" d="M121.48,126A63,63,0,1,0,64.07,37.08,46.25,46.25,0,1,0,46.24,126" />
+                        <path class="cls-2"
+                            d="M111.58,23.45A40.58,40.58,0,0,0,88,84.34l-4.24,19.75,16.16-7.67a40.54,40.54,0,1,0,11.67-73Z" />
+                        <path class="cls-2"
+                            d="M54.68,106.54A26.26,26.26,0,0,0,67.91,66.37L70,53.45,59.8,59a26.26,26.26,0,1,0-5.12,47.59Z" />
+                    </g>
+                </g>
+            </svg>
+            <h1>CloudChat</h1>
+
+        </div>
+
+    </div>
+    <div id="swup" class="transition-fade">
+
+        {% block body %} {% endblock %}
+
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+    <script src="https://unpkg.com/swup@latest/dist/swup.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js"></script>
+  
+    <script src="../static/js/index.js"></script>
+    <script src="../static/js/chat.js"></script>
+    <script>
+        //const swup = new Swup(); // only this line when included with script tag
+    </script>
+
+</body>
+
+</html>
