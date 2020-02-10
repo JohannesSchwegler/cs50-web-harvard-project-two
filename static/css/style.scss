@@ -85,6 +85,7 @@ ul li {
     flex: 1;
     padding: 0 20px;
     position: relative;
+ 
   }
 
   &-input {
@@ -105,9 +106,27 @@ ul li {
     border-radius: 12px;
     padding: 10px 15px;
   }
+  &-messageBoard{
+    display: flex;
+    flex-direction: column;
+  }
 }
 
 
-.nav-user{
+.ms{
 
+  background:#F6F6FA;
+  border-radius: 25px;
+  padding: 10px 25px;
+  margin: 10px 0;
+  max-width: 400px;
+  &-user{
+     font-weight: 700;
+     font-size: 18px;
+
+  }
+
+  &-date{
+    font-size:12px;
+  }
 }

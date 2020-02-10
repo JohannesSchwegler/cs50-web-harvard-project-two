@@ -9,17 +9,23 @@
         <input class="cc-createChannel" />
         <button id="create-room" class="btn btn-primary">Create</button>
 
+        <div class="cc-chanels">
+            <h4>Available Channels</h4>
+            {% for room in rooms %}
+           <p class="cc-select-room">{{room}}</p>
+            {% endfor %}
 
-        <h4>Available Channels</h4>
-           {% for room in rooms %}
-          <p class="cc-select-room">{{room}}</p>
-           {% endfor %}
+        </div>
+    
         <h4>Messages</h4>
 
     </div>
 
     <div class="cc-main">
-        <div id="votes"></div>
+        <div class="cc-messageBoard">
+                   {{ messages }}
+
+        </div>
         <div class="cc-input">
             <input class="cc-username" />
             <button data-vote="Send">Nachricht senden</button>

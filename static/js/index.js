@@ -5,6 +5,7 @@ document.addEventListener("DOMContentLoaded", () => {
     var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port)
 
 
+    
     // Retrieve username
     const username = localStorage.name;
 
@@ -15,52 +16,72 @@ document.addEventListener("DOMContentLoaded", () => {
 
     var currentUsers = 0;
     //when connected, configure buttons
-    socket.on("connect", () => {
+    socket.on("connect", (data) => {
+        console.log(data);
         ++currentUsers;
         document.querySelectorAll('.cc-input button').forEach(button => {
             button.onclick = () => {
                 const message = document.querySelector('.cc-input input').value;
-                socket.emit('submit message', { 'message': message, "user": localStorage.name, "room": room });
+                socket.emit('submit message', { 'message': message, "user": localStorage.name, "room": room , "date":new Date()});
             }
         });
 
+
+
+
+        //Room Creation
         document.getElementById('create-room').onclick = () => {
-            const message = document.querySelector('.cc-createChannel').value;
-            console.log(message);
-            socket.emit('submit room', { 'message': message, "user": localStorage.name, "room": room });
+            const roomName = document.querySelector('.cc-createChannel').value;
+            socket.emit('submit room', { 'roomName': roomName, "user": localStorage.name, "room": room });
         }
+
+
 
 
     })
 
 
 
+    // Render new rooms
+    socket.on("update rooms", data => {
+        document.querySelector('.cc-chanels')
+        var p = document.createElement("p");
+        p.classList.add('cc-select-room');
+        p.innerHTML = data.roomName;
+        document.querySelector('.cc-chanels').append(p)
+    });
 
 
     //when connected, configure buttons
     socket.on("display message", data => {
-        const li = document.createElement('li');
+        const div = document.createElement('div');
+        div.classList.add('ms')
         const date = formatDate(new Date());
-        li.innerHTML = `Nachricht am ${date}: <br> ${data.message} <br> User: ${data.user}<br> Room: ${data.room} `;
-        document.querySelector('#votes').append(li)
+        div.innerHTML = `<span class="ms-user">${data.user}</span> <span class="ms-date">${date} </span> <br> ${data.message}`;
+        document.querySelector('.cc-messageBoard').append(div)
     })
+
+
+
 
 
 
     // Room selection
 
-    document.querySelectorAll('cc-select-room').forEach(p => {
+    document.querySelectorAll('.cc-select-room').forEach(p => {
         p.onclick = () => {
+
             let newRoom = p.innerHTML;
             if (newRoom == room) {
                 msg = `You are already in ${room} room.`
-                printSysMsg(msg);
+                // printSysMsg(msg);
+                console.log(`You are already in ${room} room.`);
             } else {
                 leaveRoom(room);
                 joinRoom(room);
                 room = newRoom;
             }
-
+            console.log(room);
         }
     })
 
@@ -84,7 +105,7 @@ document.addEventListener("DOMContentLoaded", () => {
         //document.querySelector('#' + CSS.escape(room)).style.backgroundColor = "white";
 
         // Clear message area
-        //document.querySelector('#display-message-section').innerHTML = '';
+       // document.querySelector('.cc-messageBoard').innerHTML = '';
 
         // Autofocus on text box
         // document.querySelector("#user_message").focus();

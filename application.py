@@ -8,6 +8,9 @@ app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
 socketio = SocketIO(app)
 
 
+MESSAGES_LIMIT = 100
+
+
 messages = {}
 users_online_global = set()
 Rooms=["Lounge"]
@@ -23,13 +26,10 @@ def about():
 
 @app.route("/chat")
 def chat():
-    return render_template('chat.html',rooms=Rooms)    
+    return render_template('chat.html',rooms=Rooms, messages=messages)    
 
 
-# Get all connected users
-@app.route("/all-users", methods=["GET"])
-def returnAllUsers():
-    return jsonify({"message": "empty file name"}), 204
+
 
 @socketio.on("user connected")
 def connected(data):
@@ -41,9 +41,33 @@ def connected(data):
 
 @socketio.on("submit message")
 def vote(data):
-    print(data)
-    #selection=data["selection"]
+    room=data["room"]
+    user=data["user"]
+    message=data["message"]
+    date=data["date"]
+    if room not in messages:
+       messages[room] = {
+           "users": set(),
+           "messages": []
+       }
+   
+    messages[room]["messages"].append({
+        "username": user,
+        "message": message,
+        "date": date
+    })
+    if len(messages[room]["messages"]) > MESSAGES_LIMIT:
+        messages[room]["messages"] = messages[room]["messages"][-MESSAGES_LIMIT:]
+
+    print(messages)
     emit("display message",data, broadcast=True)    
+
+
+
+@socketio.on('submit room')
+def submitRoom(data):
+    Rooms.append(data["roomName"])
+    emit("update rooms",data, broadcast=True)
 
 
 
