@@ -1,23 +1,31 @@
 import os
-
-from flask import Flask, render_template, jsonify, request
+import json
+import time
+from flask import Flask, render_template, jsonify, request, session, url_for,redirect
 from flask_socketio import SocketIO, emit, join_room, leave_room,send
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
 socketio = SocketIO(app)
 
-
 MESSAGES_LIMIT = 100
-
+username="undefined"
 
 messages = {}
 users_online_global = set()
-Rooms=["Lounge"]
+
+
+def init():
+    messages["Lounge"] = {
+            "users": set(),
+            "messages": []
+        }
+
 
 @app.route("/")
 def index():
-    return render_template('home.html')
+    return render_template('home.html', message = "Willkommen zurück")
+       
 
 @app.route("/about")
 def about():
@@ -26,23 +34,26 @@ def about():
 
 @app.route("/chat")
 def chat():
-    return render_template('chat.html',rooms=Rooms, messages=messages)    
+    return render_template('chat.html', rooms=messages)    
+
+
 
 
 
 
 @socketio.on("user connected")
 def connected(data):
-    print(data)
-    user= data["user"]
-    users_online_global.add(user)
+    session["username"]=data["username"]
+    username= data["username"]
+    users_online_global.add(username)
 
 
 
 @socketio.on("submit message")
 def vote(data):
     room=data["room"]
-    user=data["user"]
+    print(data)
+    username=data["username"]
     message=data["message"]
     date=data["date"]
     if room not in messages:
@@ -52,46 +63,64 @@ def vote(data):
        }
    
     messages[room]["messages"].append({
-        "username": user,
+        "username": username,
         "message": message,
         "date": date
     })
     if len(messages[room]["messages"]) > MESSAGES_LIMIT:
         messages[room]["messages"] = messages[room]["messages"][-MESSAGES_LIMIT:]
-
-    print(messages)
-    emit("display message",data, broadcast=True)    
-
-
-
-@socketio.on('submit room')
-def submitRoom(data):
-    Rooms.append(data["roomName"])
-    emit("update rooms",data, broadcast=True)
+    print(data)
+    emit("display message",data, Broadcast=True)    
 
 
 
-@socketio.on('join')
-def on_join(data):
-    """User joins a room"""
-
-    username = data["username"]
+@socketio.on("submit room")
+def channel_created(data):
     room = data["room"]
+    if room not in messages:
+        messages[room] = {
+            "users": set(),
+            "messages": []
+        }
+    emit("update rooms",data)
+
+
+
+@socketio.on("join")
+def channel_entered(data):
+    print(data)
+    room = data["room"]
+    username = data["username"]
     join_room(room)
+    messages[room]["users"].add(username)
+    emit("user joined",
+         {"room":room,
+          "username": username,
+          "date": time.time()},
+         room=room)
+    result = json.dumps(messages, default=set_default)
+    emit("join room",result) 
 
-    # Broadcast that new user has joined
-    send({"msg": username + " has joined the " + room + " room."}, room=room)
 
-
-@socketio.on('leave')
-def on_leave(data):
-    """User leaves a room"""
-
-    username = data['username']
-    room = data['room']
+@socketio.on("leave")
+def channel_leaved(data):
+    room = data["room"]
+    username = data["username"]
     leave_room(room)
-    send({"msg": username + " has left the room"}, room=room)
-  
+    messages[room]["users"].discard(username)
+    emit("user leaved",
+         {"room":room,
+          "username": username,
+          "timestamp": time.time()},
+         room=room)
+
+def set_default(obj):
+    if isinstance(obj, set):
+        return list(obj)
+    raise TypeError
+
+
+
 
 @app.after_request
 def add_header(r):
@@ -106,6 +135,7 @@ def add_header(r):
     return r    
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    init()
+    socketio.run(app)
 
   

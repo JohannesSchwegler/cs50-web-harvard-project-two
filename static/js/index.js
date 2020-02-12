@@ -1,46 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
 
 
-    //Connect to websocket
-    var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port)
-
-
-    
-    // Retrieve username
-    const username = localStorage.name;
-
-    // Set default room
-    let room = "Lounge"
-    joinRoom("Lounge");
-
-
-    var currentUsers = 0;
-    //when connected, configure buttons
-    socket.on("connect", (data) => {
-        console.log(data);
-        ++currentUsers;
-        document.querySelectorAll('.cc-input button').forEach(button => {
-            button.onclick = () => {
-                const message = document.querySelector('.cc-input input').value;
-                socket.emit('submit message', { 'message': message, "user": localStorage.name, "room": room , "date":new Date()});
-            }
-        });
-
-
-
-
-        //Room Creation
-        document.getElementById('create-room').onclick = () => {
-            const roomName = document.querySelector('.cc-createChannel').value;
-            socket.emit('submit room', { 'roomName': roomName, "user": localStorage.name, "room": room });
-        }
-
-
-
-
-    })
-
-
 
     // Render new rooms
     socket.on("update rooms", data => {
@@ -105,7 +65,7 @@ document.addEventListener("DOMContentLoaded", () => {
         //document.querySelector('#' + CSS.escape(room)).style.backgroundColor = "white";
 
         // Clear message area
-       // document.querySelector('.cc-messageBoard').innerHTML = '';
+        // document.querySelector('.cc-messageBoard').innerHTML = '';
 
         // Autofocus on text box
         // document.querySelector("#user_message").focus();
