@@ -26,7 +26,8 @@ html {
 
 body {
   font-family: "Circe";
-  height: 100%;
+  height: 100vh;
+  overflow: hidden;
 }
 
 #swup {
@@ -112,13 +113,23 @@ ul li {
           flex: 1;
   padding: 0 20px;
   position: relative;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+}
+
+.cc-messageSubmit {
+  display: block;
+  width: 100%;
+  background: #F6F6FA;
 }
 
 .cc-input {
-  position: absolute;
-  bottom: 15px;
-  left: 20px;
-  display: block;
+  width: 300px;
 }
 
 .cc-input input {
@@ -138,15 +149,52 @@ ul li {
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
+  -webkit-box-flex: 1;
+      -ms-flex: 1;
+          flex: 1;
   -webkit-box-orient: vertical;
   -webkit-box-direction: normal;
       -ms-flex-direction: column;
           flex-direction: column;
+  max-height: 100%;
+  overflow-y: scroll;
+  /* width */
+  /* width */
+  /* Track */
+  /* Handle */
+  /* Handle on hover */
+}
+
+.cc-messageBoard::-webkit-scrollbar {
+  width: 11px;
+}
+
+.cc-messageBoard::-webkit-scrollbar-track {
+  -webkit-box-shadow: inset 0 0 5px grey;
+          box-shadow: inset 0 0 5px grey;
+  border-radius: 10px;
+}
+
+.cc-messageBoard::-webkit-scrollbar-thumb {
+  background: black;
+  border-radius: 10px;
+}
+
+.cc-messageBoard::-webkit-scrollbar-thumb:hover {
+  background: #000000;
 }
 
 .cc-select-room {
   cursor: pointer;
-  padding: 10px 0;
+  padding: 10px;
+  border-radius: 5px;
+  -webkit-transition: .3s all;
+  transition: .3s all;
+}
+
+.cc-select-room.current {
+  background: #007bff;
+  color: #fff;
 }
 
 .ms {
@@ -154,7 +202,11 @@ ul li {
   border-radius: 25px;
   padding: 10px 25px;
   margin: 10px 0;
-  max-width: 400px;
+  width: 400px;
+}
+
+.ms.ml {
+  margin-left: auto;
 }
 
 .ms-user {

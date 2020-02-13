@@ -1,41 +1,31 @@
-{% extends 'layout.html' %}
-
-{% block body %}
+{% extends 'layout.html' %} {% block body %}
 <div class="cc-container">
+  <div class="cc-chats">
+    <h4>Create Channel</h4>
+    <input class="cc-createChannel" />
+    <button id="create-room" class="btn btn-primary">Create</button>
 
-    <div class="cc-chats">
-
-        <h4>Create Channel</h4>
-        <input class="cc-createChannel" />
-        <button id="create-room" class="btn btn-primary">Create</button>
-
-        <div class="cc-chanels">
-            <h4>Available Channels</h4>
-            {% for room in rooms %}
-            <p class="cc-select-room">{{room}}</p>
-             {% endfor %}
-
-        </div>
-    
-        <h4>Messages</h4>
-
+    <div class="cc-chanels">
+      <h4>Available Channels</h4>
+      {% for room in rooms %}
+      <p class="cc-select-room">{{room}}</p>
+      {% endfor %}
     </div>
 
-    <div class="cc-main">
-        <div class="cc-messageBoard">
-                  
+    <h4>Messages</h4>
+  </div>
 
-        </div>
-        <div class="cc-input">
-            <input class="cc-username" />
-            <button data-vote="Send">Nachricht senden</button>
-        </div>
-
+  <div class="cc-main">
+    <div class="cc-messageBoard"></div>
+    <div class="cc-messageSubmit">
+      <div class="cc-input">
+        <input class="cc-username" />
+        <button data-vote="Send">Nachricht senden</button>
+      </div>
     </div>
-
-
+  </div>
 </div>
+<script src="../static/js/landingpage.js"></script>
 <script src="../static/js/test.js"></script>
-
 
 {% endblock %}

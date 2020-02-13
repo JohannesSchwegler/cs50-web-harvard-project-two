@@ -9,7 +9,7 @@ app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
 socketio = SocketIO(app)
 
 MESSAGES_LIMIT = 100
-username="undefined"
+
 
 messages = {}
 users_online_global = set()
@@ -29,15 +29,13 @@ def index():
 
 @app.route("/about")
 def about():
+    
     return render_template('about.html')
 
 
 @app.route("/chat")
 def chat():
     return render_template('chat.html', rooms=messages)    
-
-
-
 
 
 
@@ -70,7 +68,8 @@ def vote(data):
     if len(messages[room]["messages"]) > MESSAGES_LIMIT:
         messages[room]["messages"] = messages[room]["messages"][-MESSAGES_LIMIT:]
     print(data)
-    emit("display message",data, Broadcast=True)    
+    result = json.dumps(messages, default=set_default)
+    emit("display message",data ,room=room)    
 
 
 
@@ -82,7 +81,7 @@ def channel_created(data):
             "users": set(),
             "messages": []
         }
-    emit("update rooms",data)
+    emit("update rooms",data, broadcast=True)
 
 
 
@@ -93,13 +92,9 @@ def channel_entered(data):
     username = data["username"]
     join_room(room)
     messages[room]["users"].add(username)
-    emit("user joined",
-         {"room":room,
-          "username": username,
-          "date": time.time()},
-         room=room)
+   
     result = json.dumps(messages, default=set_default)
-    emit("join room",result) 
+    emit("join room",result,room=room) 
 
 
 @socketio.on("leave")
