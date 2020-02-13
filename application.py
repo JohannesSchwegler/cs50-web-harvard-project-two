@@ -1,16 +1,22 @@
 import os
-import json
+import datetime
+import simplejson as json
 import time
-from flask import Flask, render_template, jsonify, request, session, url_for,redirect
+from flask import Flask, render_template, jsonify, request, session, url_for,redirect, send_from_directory, send_file,  make_response
 from flask_socketio import SocketIO, emit, join_room, leave_room,send
+from werkzeug.utils import secure_filename
+
+UPLOAD_FOLDER = './uploads'
+ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 socketio = SocketIO(app)
 
 MESSAGES_LIMIT = 100
 
-
+fileName=None
 messages = {}
 users_online_global = set()
 
@@ -38,6 +44,44 @@ def chat():
     return render_template('chat.html', rooms=messages)    
 
 
+@app.route("/get-file/", methods=["GET"])
+def get_file():
+    
+
+    file =request.args.get("file")
+    with open(os.path.join(app.config['UPLOAD_FOLDER'], file), 'rb') as f:
+        data = f.read()
+    return data 
+
+  
+    
+
+
+@app.route("/receive-file/", methods=["POST"])
+def receive_file():
+    
+    file = request.files["file"]
+    
+    type=file.content_type
+   
+    if file.filename == "":
+        return jsonify({"message": "empty file name"}), 204
+    filename = secure_filename(file.filename)
+    fileName=filename
+    new_filename = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+    if os.path.isfile(new_filename):
+        # File already exists
+        pass
+     
+    file.save(new_filename)
+
+    #data=getBytes(filename)
+    
+    return jsonify({"message": "file saved",
+                    "filename": filename}), 201
+    
+    
+    return render_template('chat.html', rooms=messages)  
 
 @socketio.on("user connected")
 def connected(data):
@@ -50,10 +94,10 @@ def connected(data):
 @socketio.on("submit message")
 def vote(data):
     room=data["room"]
-    print(data)
     username=data["username"]
     message=data["message"]
     date=data["date"]
+    upload=data["upload"]
     if room not in messages:
        messages[room] = {
            "users": set(),
@@ -63,11 +107,12 @@ def vote(data):
     messages[room]["messages"].append({
         "username": username,
         "message": message,
-        "date": date
+        "date": date,
+        "upload":upload
     })
     if len(messages[room]["messages"]) > MESSAGES_LIMIT:
         messages[room]["messages"] = messages[room]["messages"][-MESSAGES_LIMIT:]
-    print(data)
+   
     result = json.dumps(messages, default=set_default)
     emit("display message",data ,room=room)    
 
@@ -114,6 +159,51 @@ def set_default(obj):
         return list(obj)
     raise TypeError
 
+
+@socketio.on("file sent")
+def test(data):
+    print(data)
+    room=data["room"]
+    username=data["username"]
+    print(data["file"])
+    message=data["file"]
+    date=data["date"]
+    upload=data["upload"]
+
+    if room not in messages:
+       messages[room] = {
+           "users": set(),
+           "messages": []
+       }
+   
+    messages[room]["messages"].append({
+        "username": username,
+        "message": message,
+        "date": date,
+        "upload":upload
+
+    })
+    if len(messages[room]["messages"]) > MESSAGES_LIMIT:
+        messages[room]["messages"] = messages[room]["messages"][-MESSAGES_LIMIT:]
+   
+    result = json.dumps(messages, default=set_default)
+    emit("display upload",{"room":room,"username":username, "message":message, "date":date,"upload":upload} ,room=room)  
+
+
+
+
+def getBytes(file):
+    print(file)
+    #data=json.dumps(send_from_directory(app.config['UPLOAD_FOLDER'],file))
+    with open(os.path.join(app.config['UPLOAD_FOLDER'], file), 'rb') as f:
+        data = f.read()
+    return data 
+
+@socketio.on("test")
+def test(data):
+    print(data)
+    file=data["filename"]
+    emit("test",getBytes(file))
 
 
 

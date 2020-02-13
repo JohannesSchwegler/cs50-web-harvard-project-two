@@ -10,6 +10,11 @@
   font-style: normal;
 }
 
+img {
+  max-width: 100%;
+  height: auto;
+}
+
 p {
   margin-top: 0;
   margin-bottom: 0;
@@ -129,11 +134,14 @@ ul li {
 }
 
 .cc-input {
-  width: 300px;
+  width: auto;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
 }
 
 .cc-input input {
-  min-width: 100%;
+  min-width: 200px;
   border: none;
 }
 
@@ -207,6 +215,17 @@ ul li {
 
 .ms.ml {
   margin-left: auto;
+}
+
+.ms img {
+  max-width: 300px;
+}
+
+.ms a {
+  display: block;
+  background-image: url("../images/logo.jpg");
+  width: 40px;
+  height: 40px;
 }
 
 .ms-user {
