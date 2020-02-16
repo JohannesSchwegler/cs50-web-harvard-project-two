@@ -73,131 +73,82 @@ document.addEventListener("DOMContentLoaded", () => {
       var file = document.querySelector(".chooseFile").files[0];
 
       sendFile(file);
-      socket.emit("file sent", {
-        room: room
-      });
     });
     // Room selection
-    addClickToRooms();
-  });
-  // Render new rooms
-  socket.on("update rooms", data => {
-    document.querySelector(".cc-chanels");
-    var p = document.createElement("p");
-    p.classList.add("cc-select-room");
-    p.innerHTML = data.room;
-    document.querySelector(".cc-chanels").append(p);
+
+    // Render new rooms
+    socket.on("update rooms", data => {
+      document.querySelector(".cc-chanels");
+      var p = document.createElement("p");
+      p.classList.add("cc-select-room");
+      p.innerHTML = data.room;
+      document.querySelector(".cc-chanels").append(p);
+      addClickToRooms();
+    });
     addClickToRooms();
   });
 
   socket.on("join room", data => {
-    document.querySelector(".cc-messageBoard").innerHTML = "";
-    let response = JSON.parse(data);
-    let messages = response[room].messages;
-    messages.forEach(data => {
-      const div = document.createElement("div");
+    console.log(data);
 
-      let upload = data["upload"] === true ? "Dies ist ein Upload" : "";
-      const date = formatDate(new Date());
-      data.username !== username
-        ? div.classList.add("ms", "ml")
-        : div.classList.add("ms");
+    if (data[1] === username) {
+      document.querySelector(".cc-messageBoard").innerHTML = "";
+      let response = JSON.parse(data[0]);
+      let messages = response[room].messages;
+  
+      messages.forEach(message => {
+        displayMessages(message);
+      });
+  
+    }
 
-      if (data["upload"] === true) {
-        div.classList.add("upload");
-      }
-      div.innerHTML = `<span class="ms-user">${data.username}</span> <span class="ms-date">${date} </span> <br> <span class="ms-message">${data.message}</span>  ${upload}`;
-      document.querySelector(".cc-messageBoard").append(div);
-    });
-
-    addEventsToUpload();
+ 
+    const p = document.createElement("p");
+    p.classList.add("ms-status");
+    p.innerHTML = `${data[1]} has connected`;
+    document.querySelector(".cc-messageBoard").append(p);
   });
 
-  socket.on("test", data => {
-    var a = _arrayBufferToBase64(data);
+  socket.on("user leaved", data => {
+    console.log(data);
+    const p = document.createElement("p");
+    p.classList.add("ms-status");
+    const date = formatDate(new Date());
+    p.innerHTML = `${data.username} has disconnected`;
+    document.querySelector(".cc-messageBoard").append(p);
   });
 
   socket.on("display message", data => {
-    console.log("display message");
+    console.log(data);
+    displayMessages(data);
+  });
+
+  socket.on("display upload", data => {
+    displayMessages(data);
+  });
+
+  function displayMessages(data) {
     const div = document.createElement("div");
     const date = formatDate(new Date());
 
     data.username !== username
       ? div.classList.add("ms", "ml")
       : div.classList.add("ms");
-    div.innerHTML = `<span class="ms-user">${data.username}</span> <span class="ms-date">${date} </span> <br> <span class="ms-message">${data.message}</span> `;
-    document.querySelector(".cc-messageBoard").append(div);
-  });
 
-  socket.on("display upload", data => {
-    console.log("display message");
-    const div = document.createElement("div");
-    const date = formatDate(new Date());
-    let upload = data["upload"] === true ? "Dies ist ein Upload" : "";
+    if (data["upload"] === true) {
+      div.innerHTML = `<span class="ms-user">${data.username}</span> <span class="ms-date">${date} </span> <br> `;
 
-    data.username !== username
-      ? div.classList.add("ms", "ml")
-      : div.classList.add("ms", "upload");
-    div.innerHTML = `<span class="ms-user">${data.username}</span> <span class="ms-date">${date} </span> <br>  <span class="ms-message">${data.message}</span>   ${upload}`;
-    document.querySelector(".cc-messageBoard").append(div);
-    addEventsToUpload();
-  });
-
-  // Scroll chat window down
-  function scrollDownChatWindow() {
-    const chatWindow = document.querySelector("#display-message-section");
-    chatWindow.scrollTop = chatWindow.scrollHeight;
-  }
-
-  // Render new file
-  socket.on("send file", data => {
-    var blob = new Blob([new Uint8Array(data[0]).buffer]);
-
-    var buffer = _arrayBufferToBase64(data[0]);
-    const div = document.createElement("div");
-    div.classList.add("ms");
-    if (data[1] === "image/png" || data[1] === "image/jpg") {
-      var image = new Image();
-      image.src = `data:image/png;base64,${buffer}`;
-      div.appendChild(image);
-    } else if (data[1] === "application/pdf") {
-      var link = document.createElement("a");
-      link.href = `data:application/pdf;base64,${buffer}`;
-      div.appendChild(link);
+      const a = document.createElement("a");
+      a.classList.add("ms-upload");
+      a.setAttribute("download", "");
+      a.setAttribute("href", `/static/uploads/${data.message}`);
+      a.innerHTML = `<span class="ms-message">${data.message}</span>`;
+      div.append(a);
+    } else {
+      div.innerHTML = `<span class="ms-user">${data.username}</span> <span class="ms-date">${date} </span> <br> ${data.message}`;
     }
-    const span = document.createElement("span");
-    span.innerHTML = data[2];
 
-    document.querySelector(".cc-messageBoard").appendChild(div);
-    document.querySelector(".cc-messageBoard").appendChild(span);
-  });
-
-  function blobToFile(theBlob, fileName) {
-    //A Blob() is almost a File() - it's just missing the two properties below which we will add
-    theBlob.lastModifiedDate = new Date();
-    theBlob.name = fileName;
-    return theBlob;
-  }
-
-  function _arrayBufferToBase64(buffer) {
-    var binary = "";
-    var bytes = new Uint8Array(buffer);
-    var len = bytes.byteLength;
-    for (var i = 0; i < len; i++) {
-      binary += String.fromCharCode(bytes[i]);
-    }
-    return window.btoa(binary);
-  }
-
-  //get files
-  function addEventsToUpload() {
-    document.querySelectorAll(".upload").forEach(item => {
-      item.addEventListener("click", () => {
-        let filename = item.childNodes[6].innerHTML;
-        getFile(`${filename}`);
-        socket.emit("test", { filename: filename });
-      });
-    });
+    document.querySelector(".cc-messageBoard").append(div);
   }
 
   // Print system messages
@@ -206,7 +157,6 @@ document.addEventListener("DOMContentLoaded", () => {
     p.setAttribute("class", "system-msg");
     p.innerHTML = msg;
     document.querySelector(".cc-messageBoard").append(p);
-    // scrollDownChatWindow()
   }
 
   function formatDate(date) {
@@ -230,6 +180,7 @@ document.addEventListener("DOMContentLoaded", () => {
     var year = date.getFullYear();
     var hours = date.getHours();
     var minutes = date.getMinutes();
+    minutes = minutes.toString().length === 1 ? `0${minutes}` : minutes;
     return (
       day +
       " " +
@@ -260,10 +211,10 @@ document.addEventListener("DOMContentLoaded", () => {
           console.log(`You are already in ${room} room.`);
           printSysMsg(msg);
         } else {
+          document.querySelector(".cc-messageBoard").innerHTML = "";
           leaveRoom(room);
           room = newRoom;
           joinRoom(room);
-          document.querySelector(".cc-messageBoard").innerHTML = "";
 
           localStorage.lastRoom = newRoom;
         }
@@ -308,78 +259,6 @@ document.addEventListener("DOMContentLoaded", () => {
     };
     var data = new FormData();
     data.append("file", file, file.name);
-
-    //data.append("channel_name", localStorage.getItem("channel"));
     request.send(data);
-
-    /*var data = new FormData();
-    data.append("file", file, file.name);
-    data.append("channel_name", localStorage.getItem("channel"));
-    request.send(data);
-*/
-  }
-
-  function b64EncodeUnicode(str) {
-    // first we use encodeURIComponent to get percent-encoded UTF-8,
-    // then we convert the percent encodings into raw bytes which
-    // can be fed into btoa.
-
-    return new Promise((resolve, reject) => {
-      resolve(
-        btoa(
-          encodeURIComponent(str).replace(
-            /%([0-9A-F]{2})/g,
-            function toSolidBytes(match, p1) {
-              return String.fromCharCode("0x" + p1);
-            }
-          )
-        )
-      );
-    });
-  }
-
-  function getFile(file) {
-    console.log(typeof file);
-
-    $.ajax({
-      url: "/get-file/",
-      data: {
-        file: file
-      },
-      contentType: "application/json"
-    }).done(function(response) {
-      b64EncodeUnicode(response).then(data => {
-        var image = new Image();
-        image.src = `data:image/png;base64,${data}`;
-        document.querySelector(".cc-messageBoard").append(image);
-      });
-      // _arrayBufferToBase64(response);
-      // const data = JSON.stringify(response);
-      /*
-      const test = b64EncodeUnicode(data).then(data => {
-        var image = new Image();
-        image.src = `data:image/png;base64,${data}`;
-        document.querySelector(".cc-messageBoard").append(image);
-      });
-*/
-      // console.log(test);
-    });
-
-    //data.append("channel_name", localStorage.getItem("channel"));
-  }
-
-  function _arrayBufferToBase64(buffer) {
-    var binary = "";
-    var bytes = new Uint8Array(buffer);
-    var len = bytes.byteLength;
-    for (var i = 0; i < len; i++) {
-      binary += String.fromCharCode(bytes[i]);
-    }
-    data = window.btoa(binary);
-    var image = new Image();
-    image.src = `data:image/png;base64,${data}`;
-    var w = window.open("");
-    w.document.write(image.outerHTML);
-    //document.querySelector(".cc-messageBoard").append(image);
   }
 });

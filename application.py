@@ -6,7 +6,8 @@ from flask import Flask, render_template, jsonify, request, session, url_for,red
 from flask_socketio import SocketIO, emit, join_room, leave_room,send
 from werkzeug.utils import secure_filename
 
-UPLOAD_FOLDER = './uploads'
+
+UPLOAD_FOLDER = './static/uploads'
 ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
 
 app = Flask(__name__)
@@ -30,7 +31,7 @@ def init():
 
 @app.route("/")
 def index():
-    return render_template('home.html', message = "Willkommen zurück")
+    return render_template('home.html', message = "Welcome back")
        
 
 @app.route("/about")
@@ -74,8 +75,6 @@ def receive_file():
         pass
      
     file.save(new_filename)
-
-    #data=getBytes(filename)
     
     return jsonify({"message": "file saved",
                     "filename": filename}), 201
@@ -139,11 +138,12 @@ def channel_entered(data):
     messages[room]["users"].add(username)
    
     result = json.dumps(messages, default=set_default)
-    emit("join room",result,room=room) 
+    emit("join room",[result,username],room=room) 
 
 
 @socketio.on("leave")
 def channel_leaved(data):
+    print(data)
     room = data["room"]
     username = data["username"]
     leave_room(room)
@@ -165,7 +165,6 @@ def test(data):
     print(data)
     room=data["room"]
     username=data["username"]
-    print(data["file"])
     message=data["file"]
     date=data["date"]
     upload=data["upload"]
@@ -190,20 +189,6 @@ def test(data):
     emit("display upload",{"room":room,"username":username, "message":message, "date":date,"upload":upload} ,room=room)  
 
 
-
-
-def getBytes(file):
-    print(file)
-    #data=json.dumps(send_from_directory(app.config['UPLOAD_FOLDER'],file))
-    with open(os.path.join(app.config['UPLOAD_FOLDER'], file), 'rb') as f:
-        data = f.read()
-    return data 
-
-@socketio.on("test")
-def test(data):
-    print(data)
-    file=data["filename"]
-    emit("test",getBytes(file))
 
 
 

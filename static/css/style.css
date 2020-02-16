@@ -1,4 +1,6 @@
-*, *:before, *:after {
+*,
+*:before,
+*:after {
   -webkit-box-sizing: border-box;
           box-sizing: border-box;
 }
@@ -116,7 +118,6 @@ ul li {
   -webkit-box-flex: 1;
       -ms-flex: 1;
           flex: 1;
-  padding: 0 20px;
   position: relative;
   display: -webkit-box;
   display: -ms-flexbox;
@@ -130,10 +131,12 @@ ul li {
 .cc-messageSubmit {
   display: block;
   width: 100%;
-  background: #F6F6FA;
+  background: #f6f6fa;
 }
 
 .cc-input {
+  padding: 15px 0;
+  background: #fff;
   width: auto;
   display: -webkit-box;
   display: -ms-flexbox;
@@ -150,7 +153,8 @@ ul li {
   border: none;
   color: #000;
   border-radius: 12px;
-  padding: 10px 15px;
+  padding: 0 0 0 15px;
+  border: 2px solid #a7a7a7 !important;
 }
 
 .cc-messageBoard {
@@ -164,6 +168,7 @@ ul li {
   -webkit-box-direction: normal;
       -ms-flex-direction: column;
           flex-direction: column;
+  padding: 0 20px;
   max-height: 100%;
   overflow-y: scroll;
   /* width */
@@ -196,8 +201,8 @@ ul li {
   cursor: pointer;
   padding: 10px;
   border-radius: 5px;
-  -webkit-transition: .3s all;
-  transition: .3s all;
+  -webkit-transition: 0.3s all;
+  transition: 0.3s all;
 }
 
 .cc-select-room.current {
@@ -206,26 +211,44 @@ ul li {
 }
 
 .ms {
-  background: #F6F6FA;
+  background: #f6f6fa;
   border-radius: 25px;
   padding: 10px 25px;
   margin: 10px 0;
   width: 400px;
 }
 
+.ms-upload {
+  position: relative;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+}
+
+.ms-upload:after {
+  content: "";
+  display: block;
+  background-image: url("/static/images/download.png");
+  background-size: contain;
+  width: 20px;
+  height: 20px;
+  margin-left: 5px;
+}
+
 .ms.ml {
   margin-left: auto;
 }
 
-.ms img {
-  max-width: 300px;
+.ms-status {
+  text-align: center;
+  padding: 10px;
 }
 
-.ms a {
-  display: block;
-  background-image: url("../images/logo.jpg");
-  width: 40px;
-  height: 40px;
+.ms img {
+  max-width: 300px;
 }
 
 .ms-user {
